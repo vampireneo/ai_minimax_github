@@ -14,7 +14,7 @@ import minimax.Minimax.Player;
 public class Main extends PApplet
 {
     private Environment env;
-    private final static int BOARD_SIZE = 3;
+    private final static int BOARD_SIZE = GuiConfig.BOARD_COLUMNS;
 
     public static void main(String[] args)
     {
@@ -47,12 +47,12 @@ public class Main extends PApplet
         Coordinate2D co = env.get_board().get_clicked_coordinates();
         System.out.println("x "+co.section_x);
         System.out.println("y "+co.section_y);
-        //TODO: click Ÿbernehmen
+        //TODO: click Ã¼bernehmen
 		prevState.field[0][0] = 1;	
 		results.add(new Cross(0));
 
 		System.out.println(prevState.toString());
-		for (int i=0; i<BOARD_SIZE*BOARD_SIZE-1; i++) 
+		for (int i=0; i<BOARD_SIZE*BOARD_SIZE-1; i++)
 		{
 			if (i%2 == 0) 
 				currState = mmPlayerMax.getMinimaxDecision(prevState);
