@@ -2,7 +2,12 @@ package minimax;
 
 public class State 
 {
-	public int[][] field = new int[Minimax.boardSize][Minimax.boardSize];
+	public int[][] field;
+	
+	public State()
+	{
+		field = new int[Minimax.boardSize][Minimax.boardSize];
+	}
 
     public String toString() 
     {

@@ -3,274 +3,229 @@ package minimax;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Minimax 
 {	
 	public enum Player 
 	{MIN, MAX};
 	
+	Player player = Player.MAX;
 	public static int boardSize;
-	
-	Player p = Player.MAX;
-	int termCount =0;
-	
+
 	public Minimax(Player p, int boardSize) 
 	{
-		this.p = p;
+		this.player = p;
 		Minimax.boardSize = boardSize;
 	}
 	
-	public State getMinimaxDecision(State initial) 
+	public State getMinimaxDecision(State initialState) 
 	{
-		this.termCount = 0;
-		long now = System.currentTimeMillis();
+		long t1 = System.currentTimeMillis();
+		
 		Action bestAction = null;
-		double bestUt = Double.NEGATIVE_INFINITY;
-		List<Action> l = getActions(initial);
-		for (Action a : l) {
-			State tmp = getResult(initial,a);
-			double minVal = minValue(tmp);
-			if (minVal > bestUt) {
-				bestUt = minVal;
-				bestAction = a;
+		double bestUtility = Double.NEGATIVE_INFINITY;
+		List<Action> actionList = getActions(initialState);
+		
+		for (Action action : actionList) 
+		{
+			double utility = minValue(getResult(initialState, action));
+			if (utility > bestUtility) 
+			{
+				bestUtility = utility;
+				bestAction = action;
 			}
 		}
 
-		State res = getResult(initial, bestAction);
-		long then = System.currentTimeMillis(); 
-		System.out.println("terminal nodes:" + this.termCount + " calculation took: " + (then-now) + "ms");
-		return res;		
+		State resultState = getResult(initialState, bestAction);
+		
+		long t2 = System.currentTimeMillis(); 
+		System.out.println("TIME: " + (t2-t1) + "ms");
+		
+		return resultState;		
 	}
 	
 	private double minValue(State state) 
 	{
-		if (terminalTest(state)) {
+		double utility = Double.POSITIVE_INFINITY;
+		
+		if (terminalTest(state)) 
 			return utility(state);
-		}
 		
-		double ut = Double.POSITIVE_INFINITY;
-		for (Action a: getActions(state)) {
-			State tmp = getResult(state, a);
-			ut = Math.min(ut,maxValue(tmp) );
+		for (Action action: getActions(state)) 
+		{
+			double tmp = maxValue(getResult(state, action));
+			utility = Math.min(utility,tmp);
 		}
-		
-		return ut;
+		return utility;
 	}
 	
-	private double maxValue(State state) {
-		if (terminalTest(state)) {
-			return utility(state);
-		}
-		double ut = Double.NEGATIVE_INFINITY;
-		for (Action a: getActions(state)) {
-			State tmp = getResult(state,a);
-			ut = Math.max(ut, minValue(tmp));
-		}
+	private double maxValue(State state) 
+	{
+		double utility = Double.NEGATIVE_INFINITY;
 		
-		return ut;
+		if (terminalTest(state)) 
+			return utility(state);
+
+		for (Action action: getActions(state)) 
+		{
+			double tmp = minValue(getResult(state,action));
+			utility = Math.max(utility, tmp);
+		}
+		return utility;
 	}
 
-	private State getResult(State s, Action a) 
+	private State getResult(State state, Action action) 
 	{
-		State ret = new State();
-		ret.field = new int[boardSize][boardSize];
-		for (int i=0; i < boardSize; i++) {
-			for (int j=0; j < boardSize; j++) {
-				ret.field[i][j] = s.field[i][j];
-			}
-		}
-		if (a.p == Player.MAX) {
-			ret.field[a.col][a.row] = 1;
-		} else {
-			ret.field[a.col][a.row] = -1;
-		}	
-		return ret;
+		State resultState = new State();
+		
+		for (int i=0; i<boardSize; i++) 
+			for (int j=0; j<boardSize; j++) 
+				resultState.field[i][j] = state.field[i][j];
+
+		if (action.player == Player.MAX) 
+			resultState.field[action.col][action.row] = 1;
+		else 
+			resultState.field[action.col][action.row] = -1;
+	
+		return resultState;
 	}
 	
 	private List<Action> getActions(State state) 
 	{
-		List<Action> list = new ArrayList<Action>();
-		int max = 0;
-		int min = 0;
-		for (int i=0; i < boardSize; i++) {
-			for (int j =0; j < boardSize; j++) {
-				if (state.field[i][j] == -1) {
+		List<Action> actions = new ArrayList<Action>();
+		int min = 0, max = 0;
+
+		for (int i=0; i<boardSize; i++) 
+		{
+			for (int j =0; j<boardSize; j++) 
+			{
+				if (state.field[i][j] == -1) 
 					min++;
-				} else if (state.field[i][j] == 1) {
+				else if (state.field[i][j] == 1) 
 					max++;
-				}
-			}
-		}
-		Player p = null;
-		if (max <= min) {
-			p = Player.MAX;
-		} else {
-			p = Player.MIN;
-		}
-		for (int i=0; i < boardSize; i++) {
-			for (int j =0; j < boardSize; j++) {
-				if (state.field[i][j] == 0) {
-					Action a = new Action();
-					a.p = p;
-					a.col = i;
-					a.row = j;
-					list.add(a);
-				}
 			}
 		}
 		
-		return list;
+		Player player = Player.MIN;
+		if (max <= min) 
+			player = Player.MAX;
+
+		for (int i=0; i<boardSize; i++) 
+		{
+			for (int j =0; j<boardSize; j++) 
+			{
+				if (state.field[i][j] == 0) 
+				{
+					Action action = new Action();
+					action.col = i;
+					action.row = j;
+					action.player = player;
+					actions.add(action);
+				}
+			}
+		}
+		return actions;
 	}
 	
-	private int utility(State state) {
+	private int utility(State state) 
+	{
+		int val = 0;
+		for (int i=0; i<boardSize; i++ ) 
+			val += state.field[i][i];
+	
+		if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+			return 1;
 		
+		if (val == -boardSize && player == Player.MAX || val == boardSize && player == Player.MIN) 
+			return -1;
 		
-		
-		if (!terminalTest(state)) {
-			throw new RuntimeException("not a terminal state:\n" + state);
-		} else {
-			this.termCount++;
-			if (termCount % 1000000 == 0) {
-				System.out.println("terminal nodes visited: " + this.termCount); 
-			}
+		val=0;
+		for (int i=0; i<boardSize; i++) 
+		{
+			int j = boardSize-i-1;
+			val += state.field[i][j];
 		}
+		if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+			return 1;
 		
-		//columns
-		for (int i=0; i < boardSize; i++) {
-			int c = 0;
-			for (int j=0; j < boardSize; j++) {
-				c += state.field[i][j];
-			}
-			if (c == boardSize && p == Player.MAX || c == -boardSize && p == Player.MIN) {
-				return 1;
-			}
-			if (c == -boardSize && p == Player.MAX || c == boardSize && p == Player.MIN) {
-				return -1;
-			}
-		}
+		if (val == -boardSize && player == Player.MAX || val == boardSize && player == Player.MIN) 
+			return -1;
 		
-		//rows
-		for (int j=0; j < boardSize; j++) {
-			int c = 0;
-			for (int i=0; i < boardSize; i++) {
-				c += state.field[i][j];
-			}
-			if (c == boardSize && p == Player.MAX || c == -boardSize && p == Player.MIN) {
-				return 1;
-			}
-			if (c == -boardSize && p == Player.MAX || c == boardSize && p == Player.MIN) {
-				return -1;
-			}
-		}
-		
-		
+		for (int i=0; i<boardSize; i++) 
+		{
+			val = 0;
+			for (int j=0; j<boardSize; j++) 
+				val += state.field[i][j];
 
-		//diagonal
-		//diagonal
-		int c = 0;
-		for (int i=0; i < boardSize; i++ ) {
-			c += state.field[i][i];
+			if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+				return 1;
+
+			if (val == -boardSize && player == Player.MAX || val == boardSize && player == Player.MIN) 
+				return -1;
 		}
-		if (c == boardSize && p == Player.MAX || c == -boardSize && p == Player.MIN) {
-			return 1;
-		}
-		if (c == -boardSize && p == Player.MAX || c == boardSize && p == Player.MIN) {
-			return -1;
-		}
-		
-		c=0;
-		for (int i=0; i < boardSize; i++) {
-			int j = boardSize -i - 1;
-			c += state.field[i][j];
-		}
-		if (c == boardSize && p == Player.MAX || c == -boardSize && p == Player.MIN) {
-			return 1;
-		}
-		if (c == -boardSize && p == Player.MAX || c == boardSize && p == Player.MIN) {
-			return -1;
+
+		for (int j=0; j<boardSize; j++) 
+		{
+			val = 0;
+			for (int i=0; i<boardSize; i++) 
+				val += state.field[i][j];
+			
+			if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+				return 1;
+			
+			if (val == -boardSize && player == Player.MAX || val == boardSize && player == Player.MIN) 
+				return -1;
 		}
 		return 0;
 	}
 	
-	private boolean terminalTest(State state) {
-		//columns
-		int ones = 0;
+	private boolean terminalTest(State state) 
+	{
+		int playedFields = 0;
 		
-		for (int i=0; i < boardSize; i++) {
-			int c = 0;
-			for (int j=0; j < boardSize; j++) {
-				c += state.field[i][j];
-				if (state.field[i][j] != 0) {
-					ones++;
-				}
+		for (int i=0; i<boardSize; i++) 
+		{
+			int total = 0;
+			for (int j=0; j<boardSize; j++) 
+			{
+				if (state.field[i][j] != 0) 
+					playedFields++;
+				
+				total += state.field[i][j];
 			}
-			if (Math.abs(c) == boardSize) {
+			if (Math.abs(total) == boardSize) 
 				return true;
-			}
 		}
 		
-		if (ones == boardSize*boardSize) {
+		if (playedFields == boardSize*boardSize)
 			return true;
-		}
 
-		//rows
-		for (int j=0; j < boardSize; j++) {
-			int c = 0;
-			for (int i=0; i < boardSize; i++) {
-				c += state.field[i][j];
-			}
-			if (Math.abs(c) == boardSize) {
+		for (int j=0; j<boardSize; j++) 
+		{
+			int total = 0;
+			for (int i=0; i<boardSize; i++) 
+				total += state.field[i][j];
+
+			if (Math.abs(total) == boardSize) 
 				return true;
-			}
 		}
 		
-
-		//diagonal
-		int c = 0;
-		for (int i=0; i < boardSize; i++ ) {
-			c += state.field[i][i];
-		}
-		if (Math.abs(c) == boardSize) {
+		int total = 0;
+		for (int i=0; i<boardSize; i++ ) 
+			total += state.field[i][i];
+		
+		if (Math.abs(total) == boardSize) 
 			return true;
+		
+		total=0;
+		for (int i=0; i<boardSize; i++) 
+		{
+			int j = boardSize-i-1;
+			total += state.field[i][j];
 		}
 		
-		c=0;
-		for (int i=0; i < boardSize; i++) {
-			int j=boardSize -i -1;
-			c += state.field[i][j];
-		}
-		if (Math.abs(c) == boardSize) {
+		if (Math.abs(total) == boardSize) 
 			return true;
-		}
 		
 		return false;		
 	}
-
-/*	// MAIN//
-	public static void main(String  [] args) {
-		State s1 = new State();
-		s1.field[0][0] = 1;
-//		s1.field[2][0] = -1;
-////		s1.field[2][2] = 1;
-////		s1.field[1][2] = -1;
-//////////		
-////		s1.field[0][1] = -1;
-////		s1.field[0][2] = 1;
-//////		s1.field[1][2] = -1;
-////		s1.field[1][0] = 1;
-////		s1.field[2][0] = -1;
-		Minimax mm1 = new Minimax(Player.MAX, 4);
-		Minimax mm2 = new Minimax(Player.MIN, 4);
-		int iter = 0;
-		System.out.println(s1);
-		for (int i=0; i < 9; i++) {
-			if (iter %2 == 0) {
-				s1=mm1.getMinimaxDecision(s1);
-			} else {
-				s1=mm2.getMinimaxDecision(s1);
-			}
-			System.out.println(s1);
-			iter++;
-		}
-	}*/
 }
