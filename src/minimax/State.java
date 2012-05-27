@@ -7,8 +7,22 @@ public class State
 	public State()
 	{
 		field = new int[Minimax.boardSize][Minimax.boardSize];
+		for(int i=0; i<Minimax.boardSize; i++)
+			for(int j=0; j<Minimax.boardSize; j++)
+				field[i][j] = 0;
 	}
 
+	public State deepCopy()
+	{
+		State copy = new State();
+		
+		for(int i=0; i<Minimax.boardSize; i++)
+			for(int j=0; j<Minimax.boardSize; j++)
+				copy.field[i][j] = this.field[i][j];
+		
+		return copy;
+	}
+	
     public String toString() 
     {
     	String s = "";

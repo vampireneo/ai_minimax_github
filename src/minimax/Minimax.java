@@ -50,7 +50,9 @@ public class Minimax
 		if (terminalTest(state)) 
 			return utility(state);
 		
-		for (Action action: getActions(state)) 
+		List<Action> actionList = getActions(state);
+		
+		for (Action action: actionList) 
 		{
 			double tmp = maxValue(getResult(state, action));
 			utility = Math.min(utility,tmp);
@@ -65,7 +67,9 @@ public class Minimax
 		if (terminalTest(state)) 
 			return utility(state);
 
-		for (Action action: getActions(state)) 
+		List<Action> actionList = getActions(state);
+		
+		for (Action action: actionList) 
 		{
 			double tmp = minValue(getResult(state,action));
 			utility = Math.max(utility, tmp);
@@ -73,13 +77,9 @@ public class Minimax
 		return utility;
 	}
 
-	private State getResult(State state, Action action) 
+	private State getResult(State currentState, Action action) 
 	{
-		State resultState = new State();
-		
-		for (int i=0; i<boardSize; i++) 
-			for (int j=0; j<boardSize; j++) 
-				resultState.field[i][j] = state.field[i][j];
+		State resultState = currentState.deepCopy(); // new State();
 
 		if (action.player == Player.MAX) 
 			resultState.field[action.col][action.row] = 1;
@@ -92,22 +92,16 @@ public class Minimax
 	private List<Action> getActions(State state) 
 	{
 		List<Action> actions = new ArrayList<Action>();
-		int min = 0, max = 0;
+		int moves = 0;
 
 		for (int i=0; i<boardSize; i++) 
-		{
 			for (int j =0; j<boardSize; j++) 
-			{
-				if (state.field[i][j] == -1) 
-					min++;
-				else if (state.field[i][j] == 1) 
-					max++;
-			}
-		}
+				if(state.field[i][j] != 0)
+					moves++;
 		
-		Player player = Player.MIN;
-		if (max <= min) 
-			player = Player.MAX;
+		Player player = Player.MAX;
+		if(moves % 2 == 1)
+			player = Player.MIN;
 
 		for (int i=0; i<boardSize; i++) 
 		{
@@ -129,25 +123,23 @@ public class Minimax
 	private int utility(State state) 
 	{
 		int val = 0;
-		for (int i=0; i<boardSize; i++ ) 
+		for (int i=0; i<boardSize; i++) 
 			val += state.field[i][i];
 	
-		if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+		if (val == boardSize && player == Player.MAX) 
 			return 1;
 		
-		if (val == -boardSize && player == Player.MAX || val == boardSize && player == Player.MIN) 
+		if (val == -boardSize && player == Player.MIN) 
 			return -1;
 		
 		val=0;
 		for (int i=0; i<boardSize; i++) 
-		{
-			int j = boardSize-i-1;
-			val += state.field[i][j];
-		}
-		if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+			val += state.field[i][boardSize-i-1];
+		
+		if (val == boardSize && player == Player.MAX) 
 			return 1;
 		
-		if (val == -boardSize && player == Player.MAX || val == boardSize && player == Player.MIN) 
+		if (val == -boardSize && player == Player.MIN) 
 			return -1;
 		
 		for (int i=0; i<boardSize; i++) 
@@ -156,10 +148,10 @@ public class Minimax
 			for (int j=0; j<boardSize; j++) 
 				val += state.field[i][j];
 
-			if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+			if (val == boardSize && player == Player.MAX) 
 				return 1;
-
-			if (val == -boardSize && player == Player.MAX || val == boardSize && player == Player.MIN) 
+			
+			if (val == -boardSize && player == Player.MIN) 
 				return -1;
 		}
 
@@ -169,30 +161,30 @@ public class Minimax
 			for (int i=0; i<boardSize; i++) 
 				val += state.field[i][j];
 			
-			if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+			if (val == boardSize && player == Player.MAX) 
 				return 1;
 			
-			if (val == -boardSize && player == Player.MAX || val == boardSize && player == Player.MIN) 
+			if (val == -boardSize && player == Player.MIN) 
 				return -1;
 		}
 		return 0;
 	}
 	
-	private boolean terminalTest(State state) 
+	public boolean terminalTest(State state) 
 	{
 		int playedFields = 0;
 		
 		for (int i=0; i<boardSize; i++) 
 		{
-			int total = 0;
+			int totalRow = 0;
 			for (int j=0; j<boardSize; j++) 
 			{
 				if (state.field[i][j] != 0) 
 					playedFields++;
 				
-				total += state.field[i][j];
+				totalRow += state.field[i][j];
 			}
-			if (Math.abs(total) == boardSize) 
+			if (Math.abs(totalRow) == boardSize) 
 				return true;
 		}
 		
@@ -210,7 +202,7 @@ public class Minimax
 		}
 		
 		int total = 0;
-		for (int i=0; i<boardSize; i++ ) 
+		for (int i=0; i<boardSize; i++) 
 			total += state.field[i][i];
 		
 		if (Math.abs(total) == boardSize) 
@@ -218,10 +210,7 @@ public class Minimax
 		
 		total=0;
 		for (int i=0; i<boardSize; i++) 
-		{
-			int j = boardSize-i-1;
-			total += state.field[i][j];
-		}
+			total += state.field[i][boardSize-i-1];
 		
 		if (Math.abs(total) == boardSize) 
 			return true;

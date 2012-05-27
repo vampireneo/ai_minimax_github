@@ -37,31 +37,40 @@ public class Main extends PApplet
 
     public void mouseClicked()
     {
-        // testliste mit vordefinierten zügen!!
+        // testliste mit vordefinierten zuegen!!
         LinkedList<Symbol> results = new LinkedList<Symbol>();
         Minimax mmPlayerMax = new Minimax(Player.MAX, BOARD_SIZE);
 		Minimax mmPlayerMin = new Minimax(Player.MIN, BOARD_SIZE);
     	State prevState = new State();
-    	State currState = prevState;
     	
         Coordinate2D co = env.get_board().get_clicked_coordinates();
         System.out.println("x "+co.section_x);
         System.out.println("y "+co.section_y);
-        //TODO: click übernehmen
-		prevState.field[0][0] = 1;	
-		results.add(new Cross(0));
+        System.out.println("Section: " + co.section);
+        int field = co.section;
+        int x = (field) % BOARD_SIZE;
+        int y = (field - x) / BOARD_SIZE;
+         
+		prevState.field[y][x] = 1;	
+
+    	State currState = prevState.deepCopy();
+    	
+		results.add(new Cross(field));
 
 		System.out.println(prevState.toString());
 		for (int i=0; i<BOARD_SIZE*BOARD_SIZE-1; i++)
 		{
+			if(mmPlayerMax.terminalTest(currState) || mmPlayerMin.terminalTest(currState))
+				break;
+			
 			if (i%2 == 0) 
-				currState = mmPlayerMax.getMinimaxDecision(prevState);
-			else 
 				currState = mmPlayerMin.getMinimaxDecision(prevState);
+			else 
+				currState = mmPlayerMax.getMinimaxDecision(prevState);
 		
 			results.add(this.stateToSymbol(prevState, currState));
 			
-			prevState = currState;
+			prevState = currState.deepCopy();
 			System.out.println(prevState.toString());
 		}
         
@@ -87,7 +96,6 @@ public class Main extends PApplet
 
         env.get_board().set_results( results );
     }
-
     
     private Symbol stateToSymbol(State prevState, State currState)
     {
