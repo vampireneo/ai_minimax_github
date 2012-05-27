@@ -19,6 +19,7 @@ public class GuiConfig
     //Animation
     public static final int SPEED                = 50;  // 10 bis 100
     public static final int TRANSPARENCY_SPEED   = 5;  // 5 bis 30
+    
 
 }
 
