@@ -9,7 +9,7 @@ public class GuiConfig
     //board
     public static final float BOARD_WIDTH   = 400;
     public static final float BOARD_HEIGHT  = 400;
-    public static final int   BOARD_COLUMNS = 4;
+    public static final int   BOARD_COLUMNS = 3;
 
     //symbols
     public static final int MARGIN   = 10;
