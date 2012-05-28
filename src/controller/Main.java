@@ -44,8 +44,6 @@ public class Main extends PApplet
     	State prevState = new State();
     	
         Coordinate2D co = env.get_board().get_clicked_coordinates();
-        System.out.println("x "+co.section_x);
-        System.out.println("y "+co.section_y);
         System.out.println("Section: " + co.section);
         int field = co.section;
         int x = (field) % BOARD_SIZE;

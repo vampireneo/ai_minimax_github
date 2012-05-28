@@ -19,6 +19,7 @@ public class Minimax
 	
 	public State getMinimaxDecision(State initialState) 
 	{
+		System.out.println("player: " + player);
 		long t1 = System.currentTimeMillis();
 		
 		Action bestAction = null;
@@ -31,7 +32,7 @@ public class Minimax
 			if (utility > bestUtility) 
 			{
 				bestUtility = utility;
-				bestAction = action;
+				bestAction = action.deepCopy();
 			}
 		}
 
@@ -47,8 +48,13 @@ public class Minimax
 	{
 		double utility = Double.POSITIVE_INFINITY;
 		
-		if (terminalTest(state)) 
+		if (terminalTest(state))
+		{
+//			System.out.println("terminal: ");
+//			System.out.println(state.toString());
+//			System.out.println("");
 			return utility(state);
+		}
 		
 		List<Action> actionList = getActions(state);
 		
@@ -64,8 +70,13 @@ public class Minimax
 	{
 		double utility = Double.NEGATIVE_INFINITY;
 		
-		if (terminalTest(state)) 
+		if (terminalTest(state))
+		{
+//			System.out.println("terminal: ");
+//			System.out.println(state.toString());
+//			System.out.println("");
 			return utility(state);
+		}
 
 		List<Action> actionList = getActions(state);
 		
@@ -79,12 +90,16 @@ public class Minimax
 
 	private State getResult(State currentState, Action action) 
 	{
-		State resultState = currentState.deepCopy(); // new State();
+		State resultState = currentState.deepCopy(); 
 
 		if (action.player == Player.MAX) 
 			resultState.field[action.col][action.row] = 1;
 		else 
 			resultState.field[action.col][action.row] = -1;
+		
+//		System.out.println("CURRENT RESULT: ");
+//		System.out.println(resultState.toString());
+//		System.out.println("");
 	
 		return resultState;
 	}
@@ -126,33 +141,33 @@ public class Minimax
 		for (int i=0; i<boardSize; i++) 
 			val += state.field[i][i];
 	
-		if (val == boardSize && player == Player.MAX) 
-			return 1;
-		
-		if (val == -boardSize && player == Player.MIN) 
-			return -1;
+		if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+            return 1;
+    
+		if ( val == boardSize && player == Player.MIN || val == -boardSize && player == Player.MAX) 
+            return -1;
 		
 		val=0;
 		for (int i=0; i<boardSize; i++) 
 			val += state.field[i][boardSize-i-1];
-		
-		if (val == boardSize && player == Player.MAX) 
-			return 1;
-		
-		if (val == -boardSize && player == Player.MIN) 
-			return -1;
-		
+
+		if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+            return 1;
+    
+		if ( val == boardSize && player == Player.MIN || val == -boardSize && player == Player.MAX) 
+            return -1;
+
 		for (int i=0; i<boardSize; i++) 
 		{
 			val = 0;
 			for (int j=0; j<boardSize; j++) 
 				val += state.field[i][j];
 
-			if (val == boardSize && player == Player.MAX) 
-				return 1;
-			
-			if (val == -boardSize && player == Player.MIN) 
-				return -1;
+			if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+	            return 1;
+	    
+			if ( val == boardSize && player == Player.MIN || val == -boardSize && player == Player.MAX) 
+	            return -1;
 		}
 
 		for (int j=0; j<boardSize; j++) 
@@ -160,12 +175,12 @@ public class Minimax
 			val = 0;
 			for (int i=0; i<boardSize; i++) 
 				val += state.field[i][j];
-			
-			if (val == boardSize && player == Player.MAX) 
-				return 1;
-			
-			if (val == -boardSize && player == Player.MIN) 
-				return -1;
+
+			if (val == boardSize && player == Player.MAX || val == -boardSize && player == Player.MIN) 
+	            return 1;
+	    
+			if ( val == boardSize && player == Player.MIN || val == -boardSize && player == Player.MAX) 
+	            return -1;
 		}
 		return 0;
 	}
